@@ -250,6 +250,9 @@ func (s *Session) Close() error {
 	<-s.sendDone
 	return nil
 }
+func (s *Session) CloseChan() <-chan struct{} {
+	return s.shutdownCh
+}
 
 func (s *Session) send() {
 	if err := s.sendLoop(); err != nil {
