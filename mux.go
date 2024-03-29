@@ -34,7 +34,6 @@ func DefaultConfig() *Config {
 	return &Config{
 		MaxStream:          defaultMaxStream,
 		MaxStreamSize:      defaultMaxStreamSize,
-		KeepAlive:          true,
 		KeepAliveInterval:  defaultKeepAliveInterval,
 		TimeoutWrite:       defaultTimeoutWrite,
 		TimeoutStreamOpen:  defaultTimeoutStreamOpen,
@@ -42,11 +41,34 @@ func DefaultConfig() *Config {
 		LogWriter:          &defaultLogger{},
 	}
 }
-
-func Server(conn io.ReadWriteCloser, conf *Config) *Session {
-	return newSession(conf, conn, false)
+func verifyConfig(config *Config) *Config {
+	if config.MaxStream <= 0 {
+		config.MaxStream = defaultMaxStream
+	}
+	if config.MaxStreamSize == 0 {
+		config.MaxStreamSize = defaultMaxStreamSize
+	}
+	if config.KeepAliveInterval == 0 {
+		config.KeepAliveInterval = defaultKeepAliveInterval
+	}
+	if config.TimeoutWrite == 0 {
+		config.TimeoutWrite = defaultTimeoutWrite
+	}
+	if config.TimeoutStreamOpen == 0 {
+		config.TimeoutStreamOpen = defaultTimeoutStreamOpen
+	}
+	if config.TimeoutStreamClose == 0 {
+		config.TimeoutStreamClose = defaultTimeoutStreamClose
+	}
+	if config.LogWriter == nil {
+		config.LogWriter = &defaultLogger{}
+	}
+	return config
 }
 
+func Server(conn io.ReadWriteCloser, conf *Config) *Session {
+	return newSession(verifyConfig(conf), conn, false)
+}
 func Client(conn io.ReadWriteCloser, conf *Config) *Session {
-	return newSession(conf, conn, true)
+	return newSession(verifyConfig(conf), conn, true)
 }
