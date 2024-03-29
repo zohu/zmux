@@ -39,3 +39,10 @@ func (defaultLogger) Infof(format string, v ...interface{}) {
 func (defaultLogger) Errorf(format string, v ...interface{}) {
 	fmt.Println(fmt.Sprintf(format, v...))
 }
+
+func Ptr[T any](v T) *T {
+	return &v
+}
+func Val[T any](v *T) T {
+	return *v
+}

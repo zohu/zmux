@@ -82,7 +82,7 @@ func newSession(conf *Config, conn io.ReadWriteCloser, isClient bool) *Session {
 	}
 	go s.recv()
 	go s.send()
-	if conf.KeepAlive {
+	if Val(conf.KeepAlive) {
 		go s.keepalive()
 	}
 	return s

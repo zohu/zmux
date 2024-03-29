@@ -22,7 +22,7 @@ type Logger interface {
 type Config struct {
 	MaxStream          int
 	MaxStreamSize      uint32
-	KeepAlive          bool
+	KeepAlive          *bool
 	KeepAliveInterval  time.Duration
 	TimeoutWrite       time.Duration
 	TimeoutStreamOpen  time.Duration
@@ -30,40 +30,35 @@ type Config struct {
 	LogWriter          Logger
 }
 
-func DefaultConfig() *Config {
-	return &Config{
-		MaxStream:          defaultMaxStream,
-		MaxStreamSize:      defaultMaxStreamSize,
-		KeepAliveInterval:  defaultKeepAliveInterval,
-		TimeoutWrite:       defaultTimeoutWrite,
-		TimeoutStreamOpen:  defaultTimeoutStreamOpen,
-		TimeoutStreamClose: defaultTimeoutStreamClose,
-		LogWriter:          &defaultLogger{},
+func verifyConfig(conf *Config) *Config {
+	if conf == nil {
+		conf = &Config{}
 	}
-}
-func verifyConfig(config *Config) *Config {
-	if config.MaxStream <= 0 {
-		config.MaxStream = defaultMaxStream
+	if conf.KeepAlive == nil {
+		conf.KeepAlive = Ptr(true)
 	}
-	if config.MaxStreamSize == 0 {
-		config.MaxStreamSize = defaultMaxStreamSize
+	if conf.MaxStream <= 0 {
+		conf.MaxStream = defaultMaxStream
 	}
-	if config.KeepAliveInterval == 0 {
-		config.KeepAliveInterval = defaultKeepAliveInterval
+	if conf.MaxStreamSize <= 0 {
+		conf.MaxStreamSize = defaultMaxStreamSize
 	}
-	if config.TimeoutWrite == 0 {
-		config.TimeoutWrite = defaultTimeoutWrite
+	if conf.KeepAliveInterval == 0 {
+		conf.KeepAliveInterval = defaultKeepAliveInterval
 	}
-	if config.TimeoutStreamOpen == 0 {
-		config.TimeoutStreamOpen = defaultTimeoutStreamOpen
+	if conf.TimeoutWrite == 0 {
+		conf.TimeoutWrite = defaultTimeoutWrite
 	}
-	if config.TimeoutStreamClose == 0 {
-		config.TimeoutStreamClose = defaultTimeoutStreamClose
+	if conf.TimeoutStreamOpen == 0 {
+		conf.TimeoutStreamOpen = defaultTimeoutStreamOpen
 	}
-	if config.LogWriter == nil {
-		config.LogWriter = &defaultLogger{}
+	if conf.TimeoutStreamClose == 0 {
+		conf.TimeoutStreamClose = defaultTimeoutStreamClose
 	}
-	return config
+	if conf.LogWriter == nil {
+		conf.LogWriter = &defaultLogger{}
+	}
+	return conf
 }
 
 func Server(conn io.ReadWriteCloser, conf *Config) *Session {

@@ -35,12 +35,11 @@ func (p *pipeConn) Close() error {
 }
 
 func _conf() *Config {
-	conf := DefaultConfig()
-	conf.MaxStream = 64
-	conf.KeepAlive = true
-	conf.KeepAliveInterval = 100 * time.Millisecond
-	conf.TimeoutWrite = 250 * time.Millisecond
-	return conf
+	return &Config{
+		MaxStream:         64,
+		KeepAliveInterval: 100 * time.Millisecond,
+		TimeoutWrite:      250 * time.Millisecond,
+	}
 }
 func _conn() (io.ReadWriteCloser, io.ReadWriteCloser) {
 	read1, write1 := io.Pipe()
@@ -1020,7 +1019,7 @@ func TestKeepAliveTimeout(t *testing.T) {
 	conn1, conn2 := _conn()
 	clientConf := _conf()
 	clientConf.TimeoutWrite = time.Hour // We're testing keep alives, not connection writes
-	clientConf.KeepAlive = false        // Just test one direction, so it's deterministic who hangs up on whom
+	clientConf.KeepAlive = Ptr(false)   // Just test one direction, so it's deterministic who hangs up on whom
 	client := Client(conn1, clientConf)
 	defer client.Close()
 
@@ -1204,7 +1203,7 @@ func TestBacklogExceededAccept(t *testing.T) {
 }
 func TestSessionUpdateWriteDuringRead(t *testing.T) {
 	conf := _conf()
-	conf.KeepAlive = false
+	conf.KeepAlive = Ptr(false)
 	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
@@ -1265,7 +1264,7 @@ func TestSessionUpdateWriteDuringRead(t *testing.T) {
 }
 func TestSessionPartialReadWindowUpdate(t *testing.T) {
 	conf := _conf()
-	conf.KeepAlive = false
+	conf.KeepAlive = Ptr(false)
 	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
@@ -1325,7 +1324,7 @@ func TestSessionPartialReadWindowUpdate(t *testing.T) {
 }
 func TestSessionSendWithoutWaitTimeout(t *testing.T) {
 	conf := _conf()
-	conf.KeepAlive = false
+	conf.KeepAlive = Ptr(false)
 	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
@@ -1379,7 +1378,7 @@ func TestSessionSendWithoutWaitTimeout(t *testing.T) {
 }
 func TestSessionPingOfDeath(t *testing.T) {
 	conf := _conf()
-	conf.KeepAlive = false
+	conf.KeepAlive = Ptr(false)
 	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
@@ -1455,7 +1454,7 @@ func TestSessionPingOfDeath(t *testing.T) {
 }
 func TestSessionConnectionWriteTimeout(t *testing.T) {
 	conf := _conf()
-	conf.KeepAlive = false
+	conf.KeepAlive = Ptr(false)
 	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
