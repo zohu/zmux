@@ -35,7 +35,7 @@ func (p *pipeConn) Close() error {
 }
 
 func _conf() *Config {
-	conf := verifyConfig(nil)
+	conf := DefaultConfig()
 	conf.MaxStream = 64
 	conf.KeepAlive = true
 	conf.KeepAliveInterval = 100 * time.Millisecond
@@ -248,8 +248,9 @@ func TestAccept(t *testing.T) {
 	}
 }
 func TestOpenStreamTimeout(t *testing.T) {
-	const timeout = 25 * time.Millisecond
-	client, server := _cs(&Config{TimeoutStreamOpen: timeout})
+	conf := _conf()
+	conf.TimeoutStreamOpen = 25 * time.Millisecond
+	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
 
@@ -258,7 +259,7 @@ func TestOpenStreamTimeout(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(timeout * 5)
+	time.Sleep(conf.TimeoutStreamOpen * 5)
 
 	if s.state != stateClosed {
 		t.Fatalf("stream should have been closed")
@@ -269,7 +270,9 @@ func TestOpenStreamTimeout(t *testing.T) {
 }
 func TestCloseTimeout(t *testing.T) {
 	const timeout = 10 * time.Millisecond
-	client, server := _cs(&Config{TimeoutStreamClose: timeout})
+	conf := _conf()
+	conf.TimeoutStreamClose = timeout
+	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
 
@@ -690,10 +693,10 @@ func TestManyStreamsPingPong(t *testing.T) {
 	wg.Wait()
 }
 func TestHalfClose(t *testing.T) {
-	client, server := _cs(&Config{
-		MaxStream:    64,
-		TimeoutWrite: 250 * time.Millisecond,
-	})
+	conf := _conf()
+	conf.MaxStream = 64
+	conf.TimeoutWrite = 250 * time.Millisecond
+	client, server := _cs(conf)
 	defer client.Close()
 	defer server.Close()
 

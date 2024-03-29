@@ -30,40 +30,23 @@ type Config struct {
 	LogWriter          Logger
 }
 
-func verifyConfig(conf *Config) *Config {
-	if conf == nil {
-		conf = &Config{KeepAlive: true}
+func DefaultConfig() *Config {
+	return &Config{
+		MaxStream:          defaultMaxStream,
+		MaxStreamSize:      defaultMaxStreamSize,
+		KeepAlive:          true,
+		KeepAliveInterval:  defaultKeepAliveInterval,
+		TimeoutWrite:       defaultTimeoutWrite,
+		TimeoutStreamOpen:  defaultTimeoutStreamOpen,
+		TimeoutStreamClose: defaultTimeoutStreamClose,
+		LogWriter:          &defaultLogger{},
 	}
-	if conf.MaxStream <= 0 {
-		conf.MaxStream = defaultMaxStream
-	}
-	if conf.MaxStreamSize < defaultMaxStreamSize {
-		conf.MaxStreamSize = defaultMaxStreamSize
-	}
-	if conf.KeepAliveInterval == 0 {
-		conf.KeepAliveInterval = defaultKeepAliveInterval
-	}
-	if conf.TimeoutWrite == 0 {
-		conf.TimeoutWrite = defaultTimeoutWrite
-	}
-	if conf.TimeoutStreamOpen == 0 {
-		conf.TimeoutStreamOpen = defaultTimeoutStreamOpen
-	}
-	if conf.TimeoutStreamClose == 0 {
-		conf.TimeoutStreamClose = defaultTimeoutStreamClose
-	}
-	if conf.LogWriter == nil {
-		conf.LogWriter = &defaultLogger{}
-	}
-	return conf
 }
 
 func Server(conn io.ReadWriteCloser, conf *Config) *Session {
-	conf = verifyConfig(conf)
 	return newSession(conf, conn, false)
 }
 
 func Client(conn io.ReadWriteCloser, conf *Config) *Session {
-	conf = verifyConfig(conf)
 	return newSession(conf, conn, true)
 }
